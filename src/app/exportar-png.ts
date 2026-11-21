@@ -38,6 +38,23 @@ function retangulo(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.roundRect(x, y, w, h, r);
 }
 
+function desenharInstagram(ctx: CanvasRenderingContext2D, x: number, y: number, t: number, cor: string) {
+  const e = t * 0.09;
+  ctx.save();
+  ctx.strokeStyle = cor;
+  ctx.fillStyle = cor;
+  ctx.lineWidth = e;
+  retangulo(ctx, x + e / 2, y + e / 2, t - e, t - e, t * 0.28);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x + t / 2, y + t / 2, t * 0.21, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x + t * 0.75, y + t * 0.25, t * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 /** Desenha o relatório em um canvas 1080×1350 (4:5, bom para WhatsApp e Instagram). */
 export async function gerarPng(d: DadosImagem): Promise<Blob> {
   await Promise.all([
@@ -217,7 +234,18 @@ export async function gerarPng(d: DadosImagem): Promise<Blob> {
   ctx.fillStyle = COR.suave;
   ctx.font = `500 19px ${FONTE}`;
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('Protocolo Jackson & Pollock (7 dobras) · conversão pela equação de Siri', M, H - 52);
+  ctx.fillText('Jackson & Pollock (7 dobras) · equação de Siri', M, H - 56);
+
+  // Instagram
+  const handle = '@rosinascimentotraining';
+  ctx.font = `700 26px ${FONTE}`;
+  const hw = ctx.measureText(handle).width;
+  const ic = 30;
+  const hx = W - M - hw;
+  const iy = H - 56 - 23;
+  ctx.fillStyle = COR.vinho;
+  ctx.fillText(handle, hx, H - 56);
+  desenharInstagram(ctx, hx - ic - 12, iy, ic, COR.vinho);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Falha ao gerar a imagem'))), 'image/png'),

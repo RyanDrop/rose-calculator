@@ -5,6 +5,10 @@
 
 /* ---------- Topo ---------- */
 .topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px 16px 0;
   max-width: 1180px;
   margin: 0 auto;
@@ -44,6 +48,49 @@
 .marca-texto small {
   font-size: 13px;
   color: var(--suave);
+}
+
+.insta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--linha);
+  background: var(--creme);
+  color: var(--vinho-800);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.insta:hover {
+  border-color: var(--vinho-300);
+  background: #fff;
+}
+
+.insta svg {
+  flex: none;
+}
+
+@media (max-width: 479px) {
+  .insta {
+    padding: 0;
+    width: 44px;
+  }
+
+  .insta span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 /* ---------- Página ---------- */
@@ -301,8 +348,45 @@ h1 {
   color: var(--suave);
 }
 
+.acoes {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.btn-calcular {
+  width: 100%;
+  min-height: 58px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--vinho-900), var(--vinho-700));
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+  box-shadow: 0 16px 30px -16px rgb(79 34 44 / 0.75);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.btn-calcular:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 34px -16px rgb(79 34 44 / 0.8);
+}
+
+.btn-calcular:active {
+  transform: translateY(1px);
+}
+
+.msg-form {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--erro);
+}
+
 .btn-texto {
-  margin-top: 18px;
   min-height: 44px;
   padding: 0 4px;
   border: 0;
@@ -331,6 +415,26 @@ h1 {
   background: linear-gradient(160deg, var(--vinho-900) 0%, var(--vinho-800) 45%, var(--vinho-700) 100%);
   box-shadow: 0 30px 60px -30px rgb(79 34 44 / 0.7);
   scroll-margin-top: 16px;
+  outline: none;
+  transition: opacity 0.6s var(--ease), translate 0.6s var(--ease);
+
+  @starting-style {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+.painel-insta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgb(255 255 255 / 0.16);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.88);
 }
 
 .painel-brilho {
@@ -437,7 +541,11 @@ h1 {
   border: 7px solid #fff;
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.35), inset 0 0 0 20px var(--vinho-800);
   transform: translate(-50%, -50%);
-  transition: left 0.9s var(--ease), opacity 0.4s var(--ease), scale 0.4s var(--ease);
+  transition: left 1.1s var(--ease) 0.15s, opacity 0.4s var(--ease), scale 0.4s var(--ease);
+
+  @starting-style {
+    left: 0 !important;
+  }
 }
 
 .escala.inativa .marcador {
@@ -591,7 +699,6 @@ h1 {
 /* ---------- Método ---------- */
 .metodo {
   margin-top: 40px;
-  padding: 0 4px;
 }
 
 .metodo h2 {
@@ -796,15 +903,45 @@ h1 {
     padding-top: 24px;
   }
 
+  /* Header, calculadora e método dividem a mesma coluna de 1180px. */
   .shell {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-    align-items: start;
-    gap: 24px;
     padding: 20px;
     border-radius: 40px;
     background: rgb(255 250 248 / 0.6);
     border: 1px solid var(--linha);
     box-shadow: 0 40px 80px -50px rgb(79 34 44 / 0.35);
+  }
+
+  .shell.com-resultado {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: start;
+    gap: 24px;
+  }
+
+  /* Antes de calcular, o formulário ocupa a largura toda: aluno à esquerda, dobras à direita. */
+  .shell:not(.com-resultado) .form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+    align-items: start;
+    padding: 16px 16px 12px;
+  }
+
+  .shell:not(.com-resultado) .form-cabecalho {
+    grid-column: 1 / -1;
+    margin-bottom: 32px;
+  }
+
+  .shell:not(.com-resultado) .grupo + .grupo {
+    margin: 0 0 0 40px;
+    padding: 0 0 0 40px;
+    border-top: 0;
+    border-left: 1px solid var(--linha);
+  }
+
+  .shell:not(.com-resultado) .acoes,
+  .shell:not(.com-resultado) .msg-form {
+    grid-column: 2;
+    margin-left: 80px;
   }
 
   .painel {
@@ -829,7 +966,6 @@ h1 {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     column-gap: 56px;
-    padding: 0 20px;
   }
 
   .metodo h2 {

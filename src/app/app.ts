@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, afterNextRender, computed, inject, Injector, signal } from '@angular/core';
 import {
   DOBRAS,
   DobraId,
@@ -39,6 +39,10 @@ export class App {
   protected readonly peso = signal('');
   protected readonly dobras = signal<Record<DobraId, string>>({ ...VAZIO });
   protected readonly tocados = signal<ReadonlySet<Campo>>(new Set());
+  protected readonly calculado = signal(false);
+  protected readonly tentou = signal(false);
+  protected readonly mostrar = computed(() => this.calculado() && this.resultado() !== null);
+  private readonly injector = inject(Injector);
   protected readonly exportando = signal(false);
   protected readonly aviso = signal<string | null>(null);
 
@@ -133,7 +137,30 @@ export class App {
     this.aviso.set(null);
   }
 
+  protected calcularAgora(): void {
+    this.tentou.set(true);
+    const campos: Campo[] = ['idade', 'peso', ...DOBRAS.map((d) => d.id)];
+    this.tocados.set(new Set(campos));
+    if (!this.resultado()) {
+      const primeiro = campos.find((c) => this.erros()[c] && c !== 'peso');
+      if (primeiro) document.getElementById(primeiro)?.focus();
+      return;
+    }
+    this.calculado.set(true);
+    afterNextRender(
+      () => {
+        const painel = document.getElementById('resultado');
+        if (!painel) return;
+        painel.focus({ preventScroll: true });
+        if (window.matchMedia('(max-width: 959px)').matches) painel.scrollIntoView({ block: 'start' });
+      },
+      { injector: this.injector },
+    );
+  }
+
   protected limpar(): void {
+    this.calculado.set(false);
+    this.tentou.set(false);
     this.nome.set('');
     this.idade.set('');
     this.peso.set('');
