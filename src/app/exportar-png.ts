@@ -190,9 +190,9 @@ export async function gerarPng(d: DadosImagem): Promise<Blob> {
     ['Massa magra', r.massaMagra !== null ? `${formatar(r.massaMagra)} kg` : '—'],
   ];
   const ty = 718;
-  const gap = 20;
+  const gap = 16;
   const tw = (W - M * 2 - gap) / 2;
-  const th = 120;
+  const th = 104;
   tiles.forEach(([rotulo, valor], i) => {
     const x = M + (i % 2) * (tw + gap);
     const y = ty + Math.floor(i / 2) * (th + gap);
@@ -205,36 +205,78 @@ export async function gerarPng(d: DadosImagem): Promise<Blob> {
     ctx.fillStyle = COR.suave;
     ctx.font = `500 22px ${FONTE}`;
     ctx.textBaseline = 'top';
-    ctx.fillText(rotulo, x + 28, y + 24);
+    ctx.fillText(rotulo, x + 28, y + 20);
     ctx.fillStyle = COR.tinta;
     ctx.font = `700 40px ${FONTE}`;
-    ctx.fillText(valor, x + 28, y + 60);
+    ctx.fillText(valor, x + 28, y + 52);
   });
 
-  // Dobras
-  const dy = ty + th * 2 + gap + 34;
+  // Dobras: gráfico de barras com eixos
+  const dy = ty + th * 2 + gap + 28;
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
   ctx.fillStyle = COR.tinta;
   ctx.font = `700 26px ${FONTE}`;
-  ctx.fillText('Dobras cutâneas (mm)', M, dy);
-  const cy = dy + 48;
-  const colunas = 4;
-  const cw = (W - M * 2) / colunas;
-  DOBRAS.forEach((dobra, i) => {
-    const x = M + (i % colunas) * cw;
-    const y = cy + Math.floor(i / colunas) * 84;
+  ctx.fillText('Dobras cutâneas', M, dy);
+  const tituloW = ctx.measureText('Dobras cutâneas').width;
+  ctx.fillStyle = COR.suave;
+  ctx.font = `500 22px ${FONTE}`;
+  ctx.fillText(' (mm)', M + tituloW, dy + 3);
+
+  const valores = DOBRAS.map((x) => d.dobras[x.id]);
+  const max = Math.max(...valores);
+  const passo = max <= 20 ? 5 : max <= 50 ? 10 : 20;
+  const topoEscala = Math.max(passo, Math.ceil(max / passo) * passo);
+  const gx = M + 44;
+  const gw = W - M - gx;
+  const gTop = dy + 70;
+  const gBase = H - 116;
+  const yDe = (v: number) => gBase - (v / topoEscala) * (gBase - gTop);
+
+  ctx.font = `500 19px ${FONTE}`;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right';
+  for (let t = 0; t <= topoEscala; t += passo) {
+    const yy = Math.round(yDe(t)) + 0.5;
+    ctx.strokeStyle = t === 0 ? '#bfaab0' : COR.linha;
+    ctx.lineWidth = t === 0 ? 2 : 1.5;
+    ctx.beginPath();
+    ctx.moveTo(gx, yy);
+    ctx.lineTo(gx + gw, yy);
+    ctx.stroke();
     ctx.fillStyle = COR.suave;
-    ctx.font = `500 21px ${FONTE}`;
-    ctx.fillText(dobra.nome, x, y);
+    ctx.fillText(String(t), gx - 12, yy);
+  }
+
+  const slot = gw / DOBRAS.length;
+  const larg = 44;
+  DOBRAS.forEach((dobra, i) => {
+    const v = valores[i];
+    const cx = gx + i * slot + slot / 2;
+    const topoY = yDe(v);
+    if (gBase - topoY > 0) {
+      ctx.fillStyle = v === max ? COR.vinho : '#b8687b';
+      ctx.beginPath();
+      ctx.roundRect(cx - larg / 2, topoY, larg, gBase - topoY, [6, 6, 0, 0]);
+      ctx.fill();
+    }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = COR.tinta;
-    ctx.font = `700 32px ${FONTE}`;
-    ctx.fillText(formatar(d.dobras[dobra.id]), x, y + 30);
+    ctx.font = `700 22px ${FONTE}`;
+    ctx.fillText(`${formatar(v)} mm`, cx, topoY - 10);
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = COR.suave;
+    ctx.font = `500 20px ${FONTE}`;
+    ctx.fillText(dobra.curto, cx, gBase + 12);
   });
+  ctx.textAlign = 'left';
 
   // Rodapé
   ctx.fillStyle = COR.suave;
   ctx.font = `500 19px ${FONTE}`;
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('Jackson & Pollock (7 dobras) · equação de Siri', M, H - 56);
+  ctx.fillText('Jackson & Pollock (7 dobras) · equação de Siri', M, H - 44);
 
   // Instagram
   const handle = '@rosinascimentotraining';
@@ -242,9 +284,9 @@ export async function gerarPng(d: DadosImagem): Promise<Blob> {
   const hw = ctx.measureText(handle).width;
   const ic = 30;
   const hx = W - M - hw;
-  const iy = H - 56 - 23;
+  const iy = H - 44 - 23;
   ctx.fillStyle = COR.vinho;
-  ctx.fillText(handle, hx, H - 56);
+  ctx.fillText(handle, hx, H - 44);
   desenharInstagram(ctx, hx - ic - 12, iy, ic, COR.vinho);
 
   return new Promise((resolve, reject) =>

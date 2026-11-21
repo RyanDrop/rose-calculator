@@ -13,6 +13,7 @@ export interface Dobra {
   id: DobraId;
   nome: string;
   simbolo: string;
+  curto: string;
   local: string;
 }
 
@@ -20,42 +21,49 @@ export const DOBRAS: readonly Dobra[] = [
   {
     id: 'peito',
     nome: 'Peitoral',
+    curto: 'Peit.',
     simbolo: 'peito',
     local: 'Diagonal, entre a linha axilar anterior e o mamilo.',
   },
   {
     id: 'axilar',
     nome: 'Axilar média',
+    curto: 'Axil.',
     simbolo: 'axilar',
     local: 'Linha axilar média, na altura do processo xifoide.',
   },
   {
     id: 'triceps',
     nome: 'Tríceps',
+    curto: 'Tríc.',
     simbolo: 'tri',
     local: 'Vertical, ponto médio entre acrômio e olécrano.',
   },
   {
     id: 'subescapular',
     nome: 'Subescapular',
+    curto: 'Sub.',
     simbolo: 'sub',
     local: 'Oblíqua, 1–2 cm abaixo do ângulo inferior da escápula.',
   },
   {
     id: 'abdomen',
     nome: 'Abdominal',
+    curto: 'Abd.',
     simbolo: 'abd',
     local: 'Vertical, cerca de 2 cm ao lado da cicatriz umbilical.',
   },
   {
     id: 'suprailiaca',
     nome: 'Supra-ilíaca',
+    curto: 'Supra',
     simbolo: 'sup',
     local: 'Oblíqua, logo acima da crista ilíaca.',
   },
   {
     id: 'coxa',
     nome: 'Coxa',
+    curto: 'Coxa',
     simbolo: 'cox',
     local: 'Vertical, ponto médio entre a prega inguinal e a patela.',
   },

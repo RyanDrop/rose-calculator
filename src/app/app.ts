@@ -96,6 +96,49 @@ export class App {
     });
   });
 
+  /** Geometria do gráfico (unidades do viewBox). */
+  protected readonly G = { w: 340, h: 196, esq: 30, dir: 6, topo: 22, base: 26 };
+
+  protected readonly grafico = computed(() => {
+    const r = this.resultado();
+    if (!r) return null;
+    const barras = DOBRAS.map((d) => ({
+      id: d.id,
+      nome: d.nome,
+      curto: d.curto,
+      valor: lerNumero(this.dobras()[d.id]),
+      maior: false,
+    }));
+    const max = Math.max(...barras.map((b) => b.valor));
+    barras.forEach((b) => (b.maior = b.valor === max && max > 0));
+    const passo = max <= 20 ? 5 : max <= 50 ? 10 : 20;
+    const topo = Math.max(passo, Math.ceil(max / passo) * passo);
+    const ticks: number[] = [];
+    for (let t = 0; t <= topo; t += passo) ticks.push(t);
+    return {
+      barras,
+      ticks,
+      topo,
+      slot: (this.G.w - this.G.esq - this.G.dir) / barras.length,
+      descricao: barras.map((b) => `${b.nome} ${formatar(b.valor)}`).join(', '),
+    };
+  });
+
+  protected y(v: number, topo: number): number {
+    const altura = this.G.h - this.G.topo - this.G.base;
+    return this.G.topo + altura * (1 - v / topo);
+  }
+
+  protected barraPath(i: number, v: number, g: { slot: number; topo: number }): string {
+    const larg = Math.min(22, g.slot * 0.55);
+    const x = this.G.esq + i * g.slot + (g.slot - larg) / 2;
+    const base = this.y(0, g.topo);
+    const topoY = this.y(v, g.topo);
+    const r = Math.min(4, (base - topoY) / 2, larg / 2);
+    if (base - topoY <= 0) return '';
+    return `M${x},${base}V${topoY + r}Q${x},${topoY} ${x + r},${topoY}H${x + larg - r}Q${x + larg},${topoY} ${x + larg},${topoY + r}V${base}Z`;
+  }
+
   protected readonly marcador = computed(() => {
     const r = this.resultado();
     if (!r || !Number.isFinite(r.gordura)) return null;

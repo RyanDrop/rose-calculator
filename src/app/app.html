@@ -79,7 +79,7 @@
                 [attr.aria-invalid]="!!erro('idade')"
                 aria-describedby="idade-msg"
               />
-              <span class="unidade">anos</span>
+              <span class="unidade" aria-hidden="true"><span class="fantasma" [class.vazio]="!idade()">{{ idade() || 'Ex.: 32' }}</span><span class="u">anos</span></span>
             </div>
             <p class="msg" id="idade-msg">{{ erro('idade') }}</p>
           </div>
@@ -98,7 +98,7 @@
                 [attr.aria-invalid]="!!erro('peso')"
                 aria-describedby="peso-msg"
               />
-              <span class="unidade">kg</span>
+              <span class="unidade" aria-hidden="true"><span class="fantasma" [class.vazio]="!peso()">{{ peso() || 'Ex.: 64,5' }}</span><span class="u">kg</span></span>
             </div>
             <p class="msg" id="peso-msg">{{ erro('peso') ?? 'Para calcular massa gorda e magra.' }}</p>
           </div>
@@ -132,7 +132,7 @@
                   [attr.aria-describedby]="d.id + '-local ' + d.id + '-msg'"
                   [attr.enterkeyhint]="i < 6 ? 'next' : 'done'"
                 />
-                <span class="unidade">mm</span>
+                <span class="unidade" aria-hidden="true"><span class="fantasma" [class.vazio]="!dobras()[d.id]">{{ dobras()[d.id] || '0,0' }}</span><span class="u">mm</span></span>
               </div>
               <p class="msg" [id]="d.id + '-msg'">{{ erro(d.id) }}</p>
             </li>
@@ -205,6 +205,27 @@
           <dd>{{ fmt(resultado()?.massaMagra ?? null) }}<small>kg</small></dd>
         </div>
       </dl>
+
+      @if (grafico(); as g) {
+        <figure class="grafico">
+          <figcaption>Dobras cutâneas <span>(mm)</span></figcaption>
+          <svg [attr.viewBox]="'0 0 ' + G.w + ' ' + G.h" role="img"
+               [attr.aria-label]="'Gráfico de barras das 7 dobras em milímetros: ' + g.descricao">
+            @for (t of g.ticks; track t) {
+              <line class="grade" [attr.x1]="G.esq" [attr.x2]="G.w - G.dir" [attr.y1]="y(t, g.topo)" [attr.y2]="y(t, g.topo)" [class.base]="t === 0" />
+              <text class="eixo-y" [attr.x]="G.esq - 8" [attr.y]="y(t, g.topo)" dy="0.32em">{{ t }}</text>
+            }
+            @for (b of g.barras; track b.id; let i = $index) {
+              <g class="barra-g" tabindex="0" [attr.aria-label]="b.nome + ': ' + fmt(b.valor) + ' mm'" [class.maior]="b.maior">
+                <rect class="alvo" [attr.x]="G.esq + i * g.slot" [attr.y]="G.topo" [attr.width]="g.slot" [attr.height]="G.h - G.topo - G.base + 20" />
+                <path class="barra-d" [attr.d]="barraPath(i, b.valor, g)" />
+                <text class="valor-barra" [attr.x]="G.esq + i * g.slot + g.slot / 2" [attr.y]="y(b.valor, g.topo) - 7">{{ fmt(b.valor) }}</text>
+                <text class="eixo-x" [attr.x]="G.esq + i * g.slot + g.slot / 2" [attr.y]="G.h - 6">{{ b.curto }}</text>
+              </g>
+            }
+          </svg>
+        </figure>
+      }
 
       @if (resultado()?.foraDoEsperado) {
         <p class="alerta" role="alert">

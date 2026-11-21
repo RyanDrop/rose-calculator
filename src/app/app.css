@@ -275,13 +275,34 @@ h1 {
 
 .unidade {
   position: absolute;
+  left: 19px;
   right: 18px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 13px;
+  display: flex;
+  align-items: baseline;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Cópia invisível do valor: empurra a unidade para logo depois do número digitado. */
+.fantasma {
+  visibility: hidden;
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fantasma.vazio {
+  font-weight: 400;
+}
+
+.unidade .u {
+  margin-left: 6px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--suave);
-  pointer-events: none;
 }
 
 .msg {
@@ -628,6 +649,98 @@ h1 {
   margin-left: 4px;
   color: rgb(255 255 255 / 0.75);
   letter-spacing: 0;
+}
+
+/* Gráfico das dobras */
+.grafico {
+  margin: 22px 0 0;
+  padding: 16px 14px 10px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.16);
+}
+
+.grafico figcaption {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.grafico figcaption span {
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.7);
+}
+
+.grafico svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--fonte);
+}
+
+.grade {
+  stroke: rgb(255 255 255 / 0.14);
+  stroke-width: 1;
+}
+
+.grade.base {
+  stroke: rgb(255 255 255 / 0.45);
+}
+
+.eixo-y,
+.eixo-x {
+  fill: rgb(255 255 255 / 0.72);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.eixo-y {
+  text-anchor: end;
+}
+
+.eixo-x {
+  text-anchor: middle;
+}
+
+.alvo {
+  fill: transparent;
+}
+
+.barra-d {
+  fill: var(--tom-atleta);
+  transition: fill 0.2s var(--ease);
+}
+
+.valor-barra {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+
+.barra-g {
+  outline: none;
+  cursor: default;
+}
+
+.barra-g.maior .valor-barra,
+.barra-g:hover .valor-barra,
+.barra-g:focus-visible .valor-barra {
+  opacity: 1;
+}
+
+.barra-g:hover .barra-d,
+.barra-g:focus-visible .barra-d {
+  fill: #fff;
+}
+
+.barra-g:focus-visible .eixo-x {
+  fill: #fff;
+  font-weight: 700;
 }
 
 .alerta,
