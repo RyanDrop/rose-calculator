@@ -1,0 +1,281 @@
+<header class="topo">
+  <div class="marca">
+    <span class="avatar" aria-hidden="true">RA</span>
+    <span class="marca-texto">
+      <strong>Rosi Nascimento Personal</strong>
+      <small>Avaliação física</small>
+    </span>
+  </div>
+</header>
+
+<main class="pagina">
+  <div class="shell">
+    <!-- Formulário -->
+    <form class="form" (submit)="$event.preventDefault()" novalidate aria-labelledby="titulo">
+      <div class="form-cabecalho">
+        <h1 id="titulo">Jackson & Pollock<span class="titulo-sub">7 dobras cutâneas</span></h1>
+        <p class="lead">
+          Digite as dobras em milímetros. O percentual de gordura aparece assim que tudo estiver preenchido.
+        </p>
+      </div>
+
+      <fieldset class="grupo">
+        <legend class="legenda">Aluno(a)</legend>
+
+        <div class="campo">
+          <label for="nome">Nome <span class="opcional">opcional · aparece na imagem</span></label>
+          <div class="entrada">
+            <input
+              id="nome"
+              class="texto"
+              autocomplete="off"
+              autocapitalize="words"
+              maxlength="40"
+              placeholder="Ex.: Ana Souza"
+              [value]="nome()"
+              (input)="nome.set($any($event.target).value)"
+            />
+          </div>
+          <p class="msg"></p>
+        </div>
+
+        <div class="sexo" role="radiogroup" aria-label="Sexo">
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="sexo() === 'F'"
+            [class.ativo]="sexo() === 'F'"
+            (click)="escolherSexo('F')"
+          >
+            Feminino
+          </button>
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="sexo() === 'M'"
+            [class.ativo]="sexo() === 'M'"
+            (click)="escolherSexo('M')"
+          >
+            Masculino
+          </button>
+        </div>
+
+        <div class="linha-2">
+          <div class="campo" [class.com-erro]="erro('idade')">
+            <label for="idade">Idade</label>
+            <div class="entrada">
+              <input
+                id="idade"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Ex.: 32"
+                [value]="idade()"
+                (input)="definir('idade', $any($event.target).value)"
+                (blur)="tocar('idade')"
+                [attr.aria-invalid]="!!erro('idade')"
+                aria-describedby="idade-msg"
+              />
+              <span class="unidade">anos</span>
+            </div>
+            <p class="msg" id="idade-msg">{{ erro('idade') }}</p>
+          </div>
+
+          <div class="campo" [class.com-erro]="erro('peso')">
+            <label for="peso">Peso <span class="opcional">opcional</span></label>
+            <div class="entrada">
+              <input
+                id="peso"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Ex.: 64,5"
+                [value]="peso()"
+                (input)="definir('peso', $any($event.target).value)"
+                (blur)="tocar('peso')"
+                [attr.aria-invalid]="!!erro('peso')"
+                aria-describedby="peso-msg"
+              />
+              <span class="unidade">kg</span>
+            </div>
+            <p class="msg" id="peso-msg">{{ erro('peso') ?? 'Para calcular massa gorda e magra.' }}</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="grupo">
+        <div class="legenda-linha">
+          <legend class="legenda">Dobras cutâneas</legend>
+          <span class="contador" aria-live="polite">{{ preenchidas() }}/7 · Σ {{ fmt(somaParcial()) }} mm</span>
+        </div>
+
+        <ol class="dobras">
+          @for (d of dobrasInfo; track d.id; let i = $index) {
+            <li class="campo dobra" [class.com-erro]="erro(d.id)">
+              <label [for]="d.id">
+                <span class="dobra-num" aria-hidden="true">{{ i + 1 }}</span>
+                {{ d.nome }}
+              </label>
+              <p class="local" [id]="d.id + '-local'">{{ d.local }}</p>
+              <div class="entrada">
+                <input
+                  [id]="d.id"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0,0"
+                  [value]="dobras()[d.id]"
+                  (input)="definirDobra(d.id, $any($event.target).value)"
+                  (blur)="tocar(d.id)"
+                  [attr.aria-invalid]="!!erro(d.id)"
+                  [attr.aria-describedby]="d.id + '-local ' + d.id + '-msg'"
+                  [attr.enterkeyhint]="i < 6 ? 'next' : 'done'"
+                />
+                <span class="unidade">mm</span>
+              </div>
+              <p class="msg" [id]="d.id + '-msg'">{{ erro(d.id) }}</p>
+            </li>
+          }
+        </ol>
+
+        <p class="dica">Meça sempre do mesmo lado do corpo, 2 a 3 vezes por ponto, e use a média.</p>
+      </fieldset>
+
+      <button type="button" class="btn-texto" (click)="limpar()">Limpar tudo</button>
+    </form>
+
+    <!-- Resultado -->
+    <section class="painel" id="resultado" aria-labelledby="res-titulo" [class.pronto]="resultado()">
+      <div class="painel-brilho" aria-hidden="true"></div>
+      <h2 id="res-titulo" class="painel-titulo">Gordura corporal estimada</h2>
+
+      <div class="principal" aria-live="polite">
+        @if (resultado(); as r) {
+          <p class="valor">
+            <span class="num">{{ fmt(r.gordura) }}</span><span class="pct">%</span>
+          </p>
+          @if (r.faixa) {
+            <span class="faixa">{{ r.faixa.rotulo }}</span>
+          }
+        } @else {
+          <p class="valor vazio"><span class="num">—</span><span class="pct">%</span></p>
+          <p class="pendente">{{ pendencia() }}</p>
+        }
+      </div>
+
+      <div class="escala" [class.inativa]="marcador() === null">
+        <div class="barra" role="img" [attr.aria-label]="'Escala de referência de 0 a ' + escalaMax + '%'">
+          @for (f of faixas(); track f.rotulo) {
+            <span class="seg" [attr.data-tom]="f.tom" [style.width]="largura(f.de, f.ate)"></span>
+          }
+          <span class="marcador" [style.left.%]="(marcador() ?? 0) * 100"></span>
+        </div>
+        <ul class="legenda-escala">
+          @for (f of faixas(); track f.rotulo) {
+            <li [class.atual]="resultado()?.faixa?.rotulo === f.rotulo">
+              <span class="ponto" [attr.data-tom]="f.tom"></span>{{ f.rotulo }}
+              <span class="faixa-num">
+                @if (f.de === 0) { &lt;{{ f.ate }}% } @else if (f.ate === escalaMax) { ≥{{ f.de }}% } @else { {{ f.de }}–{{ f.ate - 1 }}% }
+              </span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <dl class="tiles">
+        <div class="tile">
+          <dt>Soma das 7 dobras</dt>
+          <dd>{{ resultado() ? fmt(resultado()!.soma) : '—' }}<small>mm</small></dd>
+        </div>
+        <div class="tile">
+          <dt>Densidade</dt>
+          <dd>{{ resultado() ? fmt(resultado()!.densidade, 4) : '—' }}<small>g/cm³</small></dd>
+        </div>
+        <div class="tile">
+          <dt>Massa gorda</dt>
+          <dd>{{ fmt(resultado()?.massaGorda ?? null) }}<small>kg</small></dd>
+        </div>
+        <div class="tile">
+          <dt>Massa magra</dt>
+          <dd>{{ fmt(resultado()?.massaMagra ?? null) }}<small>kg</small></dd>
+        </div>
+      </dl>
+
+      @if (resultado()?.foraDoEsperado) {
+        <p class="alerta" role="alert">
+          Resultado fora do esperado. Confira se as dobras estão em milímetros e a idade está correta.
+        </p>
+      }
+      @if (resultado() && resultado()!.massaGorda === null) {
+        <p class="nota">Informe o peso para ver massa gorda e massa magra.</p>
+      }
+
+      <button type="button" class="btn-exportar" [disabled]="!resultado() || exportando()" (click)="exportar()">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4.5 15.5v3A2.5 2.5 0 0 0 7 21h10a2.5 2.5 0 0 0 2.5-2.5v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        {{ exportando() ? 'Gerando imagem…' : 'Salvar resultado em PNG' }}
+      </button>
+      <p class="aviso" aria-live="polite">{{ aviso() }}</p>
+    </section>
+  </div>
+
+  <!-- Método -->
+  <section class="metodo" aria-labelledby="metodo-titulo">
+    <h2 id="metodo-titulo">Como o cálculo é feito</h2>
+
+    <ol class="passos">
+      <li>
+        <h3>Soma das dobras</h3>
+        <p>As sete medidas, em milímetros, são somadas (Σ7).</p>
+        <p class="formula">Σ7 = peito + axilar + tríceps + subescapular + abdominal + supra-ilíaca + coxa</p>
+      </li>
+      <li>
+        <h3>Densidade corporal</h3>
+        <p>A densidade (g/cm³) vem de Σ7, Σ7² e idade, com coeficientes diferentes para cada sexo.</p>
+        <p class="formula"><b>Homens</b> DC = 1,112 − 0,00043499·Σ7 + 0,00000055·Σ7² − 0,00028826·idade</p>
+        <p class="formula"><b>Mulheres</b> DC = 1,097 − 0,00046971·Σ7 + 0,00000056·Σ7² − 0,00012828·idade</p>
+      </li>
+      <li>
+        <h3>Percentual de gordura</h3>
+        <p>A densidade é convertida pela equação de Siri, um modelo de dois compartimentos.</p>
+        <p class="formula">%G = (495 ÷ DC) − 450</p>
+      </li>
+      <li>
+        <h3>Massa gorda e magra</h3>
+        <p>Com o peso informado, o percentual vira quilos.</p>
+        <p class="formula">Massa gorda = peso × %G ÷ 100 · Massa magra = peso − massa gorda</p>
+      </li>
+    </ol>
+
+    <div class="cuidados">
+      <h3>Antes de interpretar</h3>
+      <ul>
+        <li>Compare a tendência entre avaliações; pequenas variações podem ser só erro de medida.</li>
+        <li>Repita nas mesmas condições: horário, hidratação, avaliador e adipômetro.</li>
+        <li>As equações perdem precisão em extremos de gordura, idosos e atletas de elite.</li>
+        <li>As faixas são uma referência geral para adultos, não um diagnóstico.</li>
+      </ul>
+    </div>
+
+    <div class="refs">
+      <h3>Referências</h3>
+      <ul>
+        <li>Jackson AS, Pollock ML. Generalized equations for predicting body density of men. Br J Nutr. 1978;40(3):497–504.</li>
+        <li>Jackson AS, Pollock ML, Ward A. Generalized equations for predicting body density of women. Med Sci Sports Exerc. 1980;12(3):175–181.</li>
+        <li>Siri WE. Body composition from fluid spaces and density: analysis of methods. In: Brozek J, Henschel A (eds). Techniques for Measuring Body Composition. 1961.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- Barra fixa no celular -->
+<div class="barra-movel" [class.pronto]="resultado()">
+  @if (resultado(); as r) {
+    <span class="bm-valor"><b>{{ fmt(r.gordura) }}%</b> {{ r.faixa?.rotulo }}</span>
+    <a class="bm-acao" href="#resultado">Ver resultado</a>
+  } @else {
+    <span class="bm-progresso">
+      <span class="bm-trilha"><span class="bm-fill" [style.width.%]="(preenchidas() / 7) * 100"></span></span>
+      {{ preenchidas() }}/7 dobras
+    </span>
+    <span class="bm-soma">Σ {{ fmt(somaParcial()) }} mm</span>
+  }
+</div>

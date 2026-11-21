@@ -1,0 +1,93 @@
+:root {
+  --vinho-900: #4f222c;
+  --vinho-800: #5e2a35;
+  --vinho-700: #7a3644;
+  --vinho-500: #b8687b;
+  --vinho-300: #d39aa8;
+  --rosa-100: #f3dde2;
+  --rosa-50: #faf1f3;
+  --creme: #fffaf8;
+  --fundo: #f5eef0;
+  --tinta: #141a24;
+  --suave: #5c5660;
+  --linha: #e6dadd;
+  --erro: #a3271f;
+
+  --tom-baixo: #f6e3e7;
+  --tom-atleta: #e7b9c4;
+  --tom-adequado: #d18a9c;
+  --tom-atencao: #b0576d;
+  --tom-elevado: #2a0f15;
+
+  --fonte: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --raio-xl: 32px;
+  --raio-l: 24px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--fonte);
+  color: var(--tinta);
+  background:
+    radial-gradient(60rem 40rem at 100% 100%, #efe3ec 0%, transparent 60%),
+    radial-gradient(50rem 30rem at 0% 0%, #f8f2f4 0%, transparent 70%),
+    var(--fundo);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 1;
+  caret-color: var(--vinho-700);
+}
+
+::selection {
+  background: var(--vinho-700);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--vinho-700) 55%, transparent);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-color: var(--vinho-300) transparent;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
